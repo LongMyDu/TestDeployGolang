@@ -53,13 +53,15 @@ func (server *Server) Initalize(DbDriver, DbUser, DbPassword, DbPort, DbName, Db
 	server.Router = mux.NewRouter()
 
 	server.initializeRoutes()
+
+	fmt.Printf("Initialized server ")
 }
 
 // Run is...
 func (server *Server) Run(addr string) error {
 	fmt.Println("Starting to listen on 8080")
 
-	err := http.ListenAndServe(addr, server.Router)
+	err := http.ListenAndServe(addr, nil)
 
 	if err != nil {
 		return err
