@@ -18,7 +18,12 @@ func Run() {
 		seed.Load(server.DB)
 	}
 
-	serverRunning := server.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port if environment variable is not set
+	}
+
+	serverRunning := server.Run(":" + port)
 
 	if serverRunning != nil {
 		log.Fatalln("Server failed to start")

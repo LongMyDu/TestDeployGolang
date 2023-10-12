@@ -59,9 +59,9 @@ func (server *Server) Initalize(DbDriver, DbUser, DbPassword, DbPort, DbName, Db
 
 // Run is...
 func (server *Server) Run(addr string) error {
-	fmt.Println("Starting to listen on 8080")
+	fmt.Println("Starting to listen on " + addr)
 
-	err := http.ListenAndServe(addr, nil)
+	err := http.ListenAndServe(addr, server.Router)
 
 	if err != nil {
 		return err
