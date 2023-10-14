@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-    "github.com/rs/cors"
+	"github.com/rs/cors"
 )
 
 // Server is...
@@ -59,9 +59,8 @@ func (server *Server) Initalize(DbDriver, DbUser, DbPassword, DbPort, DbName, Db
 
 // Run is...
 func (server *Server) Run(addr string) error {
-	fmt.Println("Starting to listen on " + addr)
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"}, // Allow requests from any origin
+		AllowedOrigins: []string{"*"},                                       // Allow requests from any origin
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Allowed HTTP methods
 	})
 
@@ -72,6 +71,7 @@ func (server *Server) Run(addr string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Starting to listen on " + addr)
 
 	return nil
 }

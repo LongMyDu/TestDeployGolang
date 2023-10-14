@@ -19,6 +19,7 @@ func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
 			res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 			res.Header().Set("Access-Control-Max-Age", "86400")
 			res.WriteHeader(http.StatusNoContent)
+			return
 		}
 		res.Header().Set("Content-Type", "application/json")
 
