@@ -60,7 +60,7 @@ func (server *Server) Initalize(DbDriver, DbUser, DbPassword, DbPort, DbName, Db
 // Run is...
 func (server *Server) Run(addr string) error {
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},                                       // Allow requests from any origin
+		AllowedOrigins: []string{"http://localhost:3000"},                   // Allow requests from any origin
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Allowed HTTP methods
 	})
 
