@@ -24,4 +24,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc("/posts/{id}", middlewares.SetMiddlewareJSON(server.GetPost)).Methods("GET")
 	server.Router.HandleFunc("/posts/{id}", middlewares.SetMiddlewareAuth(middlewares.SetMiddlewareJSON(server.UpdatePost))).Methods("PUT")
 	server.Router.HandleFunc("/posts/{id}", middlewares.SetMiddlewareAuth(server.DeletePost)).Methods("DELETE")
+
+	server.Router.HandleFunc("/upload", uploadImageHandler).Methods("POST")
+	server.Router.HandleFunc("/image/{filename}", serveImage).Methods("GET")
 }
