@@ -9,11 +9,12 @@ import (
 // Post is...
 type Project struct {
     gorm.Model
-	UserId 		int
+	UserId 		int	`json:"user_id"`
     Status      string `gorm:"type:project_status" json:"status"`
     Name        string `gorm:"type:varchar" json:"name"`
     Description string `gorm:"type:varchar" json:"description"`
     ShareMode   string `gorm:"type:share_mode" json:"share_mode"`
+	Tasks       []Task `json:"tasks"`
 }
 
 // Prepare is...
@@ -30,9 +31,7 @@ func (p *Project) Validate() error {
 
 // Create is...
 func (p *Project) Create(db *gorm.DB) (*Project, error) {
-	var err error
-
-	err = db.Debug().Model(&Project{}).Create(&p).Error
+	err := db.Debug().Model(&Project{}).Create(&p).Error
 
 	if err != nil {
 		return &Project{}, err

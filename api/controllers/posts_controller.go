@@ -99,23 +99,19 @@ func (server *Server) CreatePost(w http.ResponseWriter, r *http.Request) {
 
 // GetPosts is...
 func (server *Server) GetPosts(res http.ResponseWriter, req *http.Request) {
-	post := models.Project{}
+	var projects []models.Project
 
-	posts, err := post.FindAllPosts(server.DB)
+    if err := server.DB.Preload("Tasks").Find(&projects).Error; err != nil {
+        responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, err)
+        return
+    }
 
-	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, err)
+    if len(projects) == 0 {
+        responses.ERROR(res, http.StatusNotFound, exitcode.BE_FAILED, errors.New("No projects found"))
+        return
+    }
 
-		return
-	}
-
-	if len(*posts) == 0 {
-		responses.ERROR(res, http.StatusNotFound, exitcode.BE_FAILED, errors.New("No posts found"))
-
-		return
-	}
-
-	responses.JSON(res, http.StatusOK, posts)
+    responses.JSON(res, http.StatusOK, projects)
 }
 
 // GetPost is...

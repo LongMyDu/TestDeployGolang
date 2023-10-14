@@ -8,7 +8,7 @@ import (
 type Task struct {
     gorm.Model
     ProjectID int `json:"project_id"`
-    Title     string `gorm:"type:varchar"`
+    Title     string `gorm:"type:varchar" json: "title"`
     Deadline  string `json: "deadline"`
 }
 
