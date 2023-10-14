@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -17,57 +18,83 @@ import (
 
 // CreatePost is...
 func (server *Server) CreatePost(w http.ResponseWriter, r *http.Request) {
-	// body, err := ioutil.ReadAll(r.Body)
+	body, err := ioutil.ReadAll(r.Body)
 
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+		return
+	}
 
-	// 	return
-	// }
+	var data map[string]interface{}
 
-	// post := models.Project{}
+	err = json.Unmarshal(body, &data)
 
-	// err = json.Unmarshal(body, &post)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+		return
+	}
 
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+	project := models.Project{
+		Name: data["name"].(string),
+		Description: data["description"].(string),
+		ShareMode: data["share_mode"].(string),
+		Status: data["status"].(string),
+	}
 
-	// 	return
-	// }
+	token, ok :=  data["token"].(string)
+	if (!ok) {
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+		return
+	}
 
-	// post.Prepare()
+	tasks, ok := data["tasks"].([]interface{})
+	if (!ok) {
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+		return
+	}
 
-	// err = post.Validate()
+	project.Prepare()
+	fmt.Printf("Create post | data =  %+v; token =  %s; tasks = %+v", data, token, tasks)
 
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, err)
+	user := models.User{}
 
-	// 	return
-	// }
+	userGotten, err := user.FindUserByToken(server.DB, token)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, exitcode.BE_FAILED, errors.New("invalid token"))
+		return
+	}
 
-	// uid, err := auth.ExtractTokenID(r)
+	project.UserId = int(userGotten.ID)
 
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusUnauthorized, exitcode.BE_FAILED, errors.New("Invalid token"))
+	projectCreated, err := project.Create(server.DB)
 
-	// 	return
-	// }
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
+		return
+	}
+	
+	for _, taskData := range tasks {
+        task, ok := taskData.(map[string]interface{})
 
-	// if uid != post.AuthorID {
-	// 	responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, errors.New("Invalid user id"))
+        if !ok {
+            fmt.Println("Invalid task data")
+            continue
+        }
 
-	// 	return
-	// }
+        newTask := models.Task{
+            Title:    task["title"].(string),
+            Deadline: task["deadline"].(string),
+			ProjectID: int(projectCreated.ID),
+        }
 
-	// postCreated, err := post.Create(server.DB)
+        // Create the task in the database
+       	newTask.Create(server.DB)
 
-	// if err != nil {
-	// 	responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
+        // Print added task details (optional)
+        fmt.Printf("Added Task:  %+v", newTask)
+    }
 
-	// 	return
-	// }
-
-	// responses.JSON(w, http.StatusCreated, postCreated)
+	responses.JSON(w, http.StatusCreated, projectCreated)
 }
 
 // GetPosts is...

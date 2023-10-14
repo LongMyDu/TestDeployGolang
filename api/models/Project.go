@@ -9,15 +9,15 @@ import (
 // Post is...
 type Project struct {
     gorm.Model
-    Status      string `gorm:"type:project_status"`
-    Name        string `gorm:"type:varchar"`
-    Description string `gorm:"type:varchar"`
-    ShareMode   string `gorm:"type:share_mode"`
+	UserId 		int
+    Status      string `gorm:"type:project_status" json:"status"`
+    Name        string `gorm:"type:varchar" json:"name"`
+    Description string `gorm:"type:varchar" json:"description"`
+    ShareMode   string `gorm:"type:share_mode" json:"share_mode"`
 }
 
 // Prepare is...
 func (p *Project) Prepare() {
-	p.ID = 0
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
 }

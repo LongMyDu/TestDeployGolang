@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"sample/api/auth"
+	// "sample/api/auth"
 	"sample/api/exitcode"
 	formaterror "sample/api/utils/errors"
 
@@ -139,17 +139,17 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenID, err := auth.ExtractTokenID(r)
+	// tokenID, err := auth.ExtractTokenID(r)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, errors.New("ID do Token inválido"))
-	}
+	// if tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, errors.New("ID do Token inválido"))
+	// }
 
 	user.Prepare()
 
@@ -188,19 +188,19 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	user := models.User{}
 
-	tokenID, err := auth.ExtractTokenID(r)
+	// tokenID, err := auth.ExtractTokenID(r)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusForbidden, exitcode.BE_FAILED, errors.New("Token invalid"))
+	// if tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusForbidden, exitcode.BE_FAILED, errors.New("Token invalid"))
 
-		return
-	}
+	// 	return
+	// }
 
 	_, err = user.DeleteUser(server.DB, uint32(uid))
 

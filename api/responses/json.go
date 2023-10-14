@@ -31,5 +31,7 @@ func ERROR(res http.ResponseWriter, statusCode int, exitcode int, err error) {
 		return
 	}
 
+	fmt.Printf("Error: %s; Exitcode = %d", err.Error(), exitcode)
+
 	JSON(res, http.StatusBadRequest, nil)
 }

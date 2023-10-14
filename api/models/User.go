@@ -157,6 +157,17 @@ func (u *User) FindUserByID(db *gorm.DB, uid uint32) (*User, error) {
 	return u, nil
 }
 
+// FindUserByToken is...
+func (u *User) FindUserByToken(db *gorm.DB, token string) (*User, error) {
+	err := db.Debug().Model(User{}).Where("token = ?", token).Take(&u).Error
+
+	if err != nil {
+		return &User{}, err
+	}
+
+	return u, nil
+}
+
 // UpdateUser is...
 func (u *User) UpdateUser(db *gorm.DB, uid uint32) (*User, error) {
 	err := u.BeforeSave()
