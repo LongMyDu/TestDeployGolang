@@ -13,14 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User is...
 type User struct {
-	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	Nickname  string    `gorm:"size:255;not null;unique" json:"nickname"`
-	Email     string    `gorm:"size:100;not null;unique" json:"email"`
-	Password  string    `gorm:"size:100;not null;" json:"password"`
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	gorm.Model
+	Email       string `gorm:"type:varchar;unique_index"`
+	Password    string `gorm:"type:varchar"`
+	FullName    string `gorm:"type:varchar"`
+	PhoneNumber string `gorm:"type:char(20)"`
+	City        string `gorm:"type:varchar"`
+	Country     string `gorm:"type:varchar"`
+	Token       string `gorm:"type:varchar"`
+	Dob         time.Time
+	TotalPoint  int
+	AvatarURL   string `gorm:"type:varchar"`
 }
 
 // Hash is...
@@ -29,8 +33,8 @@ func Hash(password string) ([]byte, error) {
 }
 
 // VerifyPassword is...
-func VerifyPassword(hashedPassowrd, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassowrd), []byte(password))
+func VerifyPassword(sent_password, password string) bool {
+	return sent_password == password
 }
 
 // BeforeSave is...
@@ -49,7 +53,7 @@ func (u *User) BeforeSave() error {
 // Prepare is...
 func (u *User) Prepare() error {
 	u.ID = 0
-	u.Nickname = html.EscapeString(strings.TrimSpace(u.Nickname))
+	u.FullName = html.EscapeString(strings.TrimSpace(u.FullName))
 	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
@@ -61,8 +65,8 @@ func (u *User) Prepare() error {
 func (u *User) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
-		if u.Nickname == "" {
-			return errors.New("Nickname required")
+		if u.FullName == "" {
+			return errors.New("FullName required")
 		}
 
 		if u.Password == "" {
@@ -95,8 +99,8 @@ func (u *User) Validate(action string) error {
 		return nil
 
 	default:
-		if u.Nickname == "" {
-			return errors.New("Nickname required")
+		if u.FullName == "" {
+			return errors.New("FullName required")
 		}
 
 		if u.Password == "" {
@@ -164,7 +168,7 @@ func (u *User) UpdateUser(db *gorm.DB, uid uint32) (*User, error) {
 	db = db.Debug().Model(User{}).Where("id = ?", uid).Take(&u).UpdateColumns(
 		map[string]interface{}{
 			"password":   u.Password,
-			"nickname":   u.Nickname,
+			"full_name":  u.FullName,
 			"email":      u.Email,
 			"updated_at": time.Now(),
 		},

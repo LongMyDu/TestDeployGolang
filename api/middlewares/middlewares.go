@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"sample/api/auth"
+	"sample/api/exitcode"
 	"sample/api/responses"
 )
 
@@ -23,7 +24,7 @@ func SetMiddlewareAuth(next http.HandlerFunc) http.HandlerFunc {
 		err := auth.TokenValid(req)
 
 		if err != nil {
-			responses.ERROR(res, http.StatusUnauthorized, errors.New("Unauthorized"))
+			responses.ERROR(res, http.StatusUnauthorized, exitcode.UNAUTHORIZED, errors.New("Unauthorized"))
 
 			return
 		}

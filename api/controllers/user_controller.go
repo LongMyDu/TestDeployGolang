@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"sample/api/auth"
+	"sample/api/exitcode"
 	formaterror "sample/api/utils/errors"
 
 	"sample/api/models"
@@ -23,7 +24,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -33,7 +34,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -43,7 +44,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = user.Validate("")
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 		return
 	}
 
@@ -53,7 +54,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		formattedError := formaterror.FormatError(err.Error())
 
-		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, formattedError)
 
 		return
 	}
@@ -70,13 +71,13 @@ func (server *Server) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := user.FindAllUsers(server.DB)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
 
 	if len(*users) == 0 {
-		responses.ERROR(w, http.StatusNotFound, errors.New("No users found"))
+		responses.ERROR(w, http.StatusNotFound, exitcode.BE_FAILED, errors.New("No users found"))
 
 		return
 	}
@@ -91,7 +92,7 @@ func (server *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -100,7 +101,7 @@ func (server *Server) GetUser(w http.ResponseWriter, r *http.Request) {
 	userGotten, err := user.FindUserByID(server.DB, uint32(uid))
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -115,7 +116,7 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -123,7 +124,7 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -133,7 +134,7 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -141,13 +142,13 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	tokenID, err := auth.ExtractTokenID(r)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
 
 	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusBadRequest, errors.New("ID do Token inválido"))
+		responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, errors.New("ID do Token inválido"))
 	}
 
 	user.Prepare()
@@ -155,7 +156,7 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	err = user.Validate("update")
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -165,7 +166,7 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		formatedError := formaterror.FormatError(err.Error())
 
-		responses.ERROR(w, http.StatusInternalServerError, formatedError)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, formatedError)
 
 		return
 	}
@@ -180,7 +181,7 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -190,13 +191,13 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	tokenID, err := auth.ExtractTokenID(r)
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
 
 	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusForbidden, errors.New("Token invalid"))
+		responses.ERROR(w, http.StatusForbidden, exitcode.BE_FAILED, errors.New("Token invalid"))
 
 		return
 	}
@@ -204,7 +205,7 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	_, err = user.DeleteUser(server.DB, uint32(uid))
 
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+		responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}

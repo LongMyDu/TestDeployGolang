@@ -1,22 +1,30 @@
 package api
 
 import (
-		"log"
+	// "fmt"
+	"log"
 	"os"
-
 	"sample/api/controllers"
-	"sample/api/seed"
+
+	// "github.com/joho/godotenv"
 )
 
 var server = controllers.Server{}
 
 // Run is...
 func Run() {
-	server.Initalize(os.Getenv("DB_DRIVER"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
+	// var err error
 
-	if os.Getenv("ENVIRONMENT") == "DEV" {
-		seed.Load(server.DB)
-	}
+	// err = godotenv.Load()
+
+	// if err != nil {
+	// 	log.Fatalf("Error getting .env. Reason: %v", err)
+	// } else {
+	// 	fmt.Println("ENV values loaded")
+	// }
+
+
+	server.Initalize(os.Getenv("DB_DRIVER"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
 
 	port := os.Getenv("PORT")
 	if port == "" {

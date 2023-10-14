@@ -14,7 +14,7 @@ import (
 )
 
 // CreateToken is...
-func CreateToken(userID uint32) (string, error) {
+func CreateToken(userID uint) (string, error) {
 	claims := jwt.MapClaims{}
 
 	claims["authorized"] = true

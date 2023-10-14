@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"sample/api/auth"
+	"sample/api/exitcode"
 	"sample/api/models"
 	"sample/api/responses"
 	formaterror "sample/api/utils/errors"
@@ -17,73 +17,73 @@ import (
 
 // CreatePost is...
 func (server *Server) CreatePost(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	// body, err := ioutil.ReadAll(r.Body)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	post := models.Post{}
+	// post := models.Project{}
 
-	err = json.Unmarshal(body, &post)
+	// err = json.Unmarshal(body, &post)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	post.Prepare()
+	// post.Prepare()
 
-	err = post.Validate()
+	// err = post.Validate()
 
-	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	uid, err := auth.ExtractTokenID(r)
+	// uid, err := auth.ExtractTokenID(r)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Invalid token"))
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnauthorized, exitcode.BE_FAILED, errors.New("Invalid token"))
 
-		return
-	}
+	// 	return
+	// }
 
-	if uid != post.AuthorID {
-		responses.ERROR(w, http.StatusBadRequest, errors.New("Invalid user id"))
+	// if uid != post.AuthorID {
+	// 	responses.ERROR(w, http.StatusBadRequest, exitcode.BE_FAILED, errors.New("Invalid user id"))
 
-		return
-	}
+	// 	return
+	// }
 
-	postCreated, err := post.Create(server.DB)
+	// postCreated, err := post.Create(server.DB)
 
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	responses.JSON(w, http.StatusCreated, postCreated)
+	// responses.JSON(w, http.StatusCreated, postCreated)
 }
 
 // GetPosts is...
 func (server *Server) GetPosts(res http.ResponseWriter, req *http.Request) {
-	post := models.Post{}
+	post := models.Project{}
 
 	posts, err := post.FindAllPosts(server.DB)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
+		responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
 
 	if len(*posts) == 0 {
-		responses.ERROR(res, http.StatusNotFound, errors.New("No posts found"))
+		responses.ERROR(res, http.StatusNotFound, exitcode.BE_FAILED, errors.New("No posts found"))
 
 		return
 	}
@@ -98,17 +98,17 @@ func (server *Server) GetPost(res http.ResponseWriter, req *http.Request) {
 	pid, err := strconv.ParseUint(vars["id"], 10, 32)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
+		responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
 		return
 	}
 
-	post := models.Post{}
+	post := models.Project{}
 
 	foundPost, err := post.FindPostByID(server.DB, uint32(pid))
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -123,48 +123,48 @@ func (server *Server) UpdatePost(res http.ResponseWriter, req *http.Request) {
 	pid, err := strconv.ParseUint(vars["id"], 10, 32)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
 
-	tokenID, err := auth.ExtractTokenID(req)
+	// tokenID, err := auth.ExtractTokenID(req)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
 
-	post := models.Post{}
+	post := models.Project{}
 	foundPost, err := post.FindPostByID(server.DB, uint32(pid))
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
 
-	if tokenID != foundPost.AuthorID {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New("Only the author can update the post"))
+	// if tokenID != foundPost.AuthorID {
+	// 	responses.ERROR(res, http.StatusUnauthorized, exitcode.BE_FAILED, errors.New("Only the author can update the post"))
 
-		return
-	}
+	// 	return
+	// }
 
 	body, err := ioutil.ReadAll(req.Body)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
 
-	postUpdate := models.Post{}
+	postUpdate := models.Project{}
 
 	err = json.Unmarshal(body, &postUpdate)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -173,7 +173,7 @@ func (server *Server) UpdatePost(res http.ResponseWriter, req *http.Request) {
 	err = postUpdate.Validate()
 
 	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
+		responses.ERROR(res, http.StatusBadRequest, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -185,7 +185,7 @@ func (server *Server) UpdatePost(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		formatedError := formaterror.FormatError(err.Error())
 
-		responses.ERROR(res, http.StatusInternalServerError, formatedError)
+		responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, formatedError)
 
 		return
 	}
@@ -195,48 +195,48 @@ func (server *Server) UpdatePost(res http.ResponseWriter, req *http.Request) {
 
 // DeletePost is...
 func (server *Server) DeletePost(res http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
+	// vars := mux.Vars(req)
 
-	pid, err := strconv.ParseUint(vars["id"], 10, 64)
+	// pid, err := strconv.ParseUint(vars["id"], 10, 64)
 
-	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
+	// if err != nil {
+	// 	responses.ERROR(res, http.StatusBadRequest, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	post := models.Post{}
-	foundPost, err := post.FindPostByID(server.DB, uint32(pid))
+	// post := models.Project{}
+	// foundPost, err := post.FindPostByID(server.DB, uint32(pid))
 
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+	// if err != nil {
+	// 	responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	tokenID, err := auth.ExtractTokenID(req)
+	// tokenID, err := auth.ExtractTokenID(req)
 
-	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
+	// if err != nil {
+	// 	responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, err)
 
-		return
-	}
+	// 	return
+	// }
 
-	if tokenID != foundPost.AuthorID {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New("Only the author can delete the post"))
+	// if tokenID != foundPost.AuthorID {
+	// 	responses.ERROR(res, http.StatusUnauthorized, exitcode.BE_FAILED, errors.New("Only the author can delete the post"))
 
-		return
-	}
+	// 	return
+	// }
 
-	_, err = foundPost.DeletePost(server.DB, foundPost.ID, tokenID)
+	// _, err = foundPost.DeletePost(server.DB, foundPost.ID, tokenID)
 
-	if err != nil {
-		formatedError := formaterror.FormatError(err.Error())
+	// if err != nil {
+	// 	formatedError := formaterror.FormatError(err.Error())
 
-		responses.ERROR(res, http.StatusInternalServerError, formatedError)
+	// 	responses.ERROR(res, http.StatusInternalServerError, exitcode.BE_FAILED, formatedError)
 
-		return
-	}
+	// 	return
+	// }
 
 	responses.JSON(res, http.StatusNoContent, "")
 }

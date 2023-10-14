@@ -18,12 +18,14 @@ func JSON(res http.ResponseWriter, statusCode int, data interface{}) {
 }
 
 // ERROR is..
-func ERROR(res http.ResponseWriter, statusCode int, err error) {
+func ERROR(res http.ResponseWriter, statusCode int, exitcode int, err error) {
 	if err != nil {
 		JSON(res, statusCode, struct {
 			Error string `json:"error"`
+			Exitcode int  `json:"exitcode"`
 		}{
 			Error: err.Error(),
+			Exitcode: exitcode,
 		})
 
 		return

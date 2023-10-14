@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
 	"sample/api/auth"
+	"sample/api/exitcode"
 	"sample/api/models"
 	"sample/api/responses"
 	formaterror "sample/api/utils/errors"
@@ -16,7 +18,7 @@ func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
 	body, err := ioutil.ReadAll(req.Body)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -25,7 +27,7 @@ func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
 	err = json.Unmarshal(body, &user)
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 
 		return
 	}
@@ -34,8 +36,7 @@ func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
 	err = user.Validate("login")
 
 	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-
+		responses.ERROR(res, http.StatusUnprocessableEntity, exitcode.BE_FAILED, err)
 		return
 	}
 
@@ -43,32 +44,48 @@ func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
-
-		responses.ERROR(res, http.StatusBadRequest, formattedError)
-
+		responses.ERROR(res, http.StatusBadRequest, exitcode.WRONG_ACCOUNT_CREDENTIAL, formattedError)
 		return
 	}
 
-	responses.JSON(res, http.StatusOK, token)
+	_, err = server.SaveToken(user.Email, token)
+
+	if err != nil {
+		responses.ERROR(res, http.StatusBadRequest, exitcode.WRONG_ACCOUNT_CREDENTIAL, err)
+		return
+	}
+
+	responses.JSON(res, http.StatusOK, map[string]interface{}{
+		"exitcode": 0,
+		"message":  "Login success",
+		"token":    token,
+	})
 }
 
 // SignIn is...
 func (server *Server) SignIn(email, password string) (string, error) {
-	var err error
-
 	user := models.User{}
 
-	err = server.DB.Debug().Model(models.User{}).Where("email = ?", email).Take(&user).Error
+	err := server.DB.Debug().Model(models.User{}).Where("email = ?", email).Take(&user).Error
 
 	if err != nil {
-		return "", err
+		return "", errors.New("email or password does not match")
 	}
 
-	err = models.VerifyPassword(user.Password, password)
+	match := models.VerifyPassword(user.Password, password)
 
-	if err != nil {
-		return "", err
+	if !match {
+		return "", errors.New("email or password does not match")
 	}
 
 	return auth.CreateToken(user.ID)
+}
+
+// Save token into db
+func (server *Server) SaveToken(email, token string) (string, error) {
+	err := server.DB.Debug().Model(models.User{}).Where("email = ?", email).Update(map[string]interface{}{
+		"token": token,
+	}).Error
+
+	return "", err
 }
